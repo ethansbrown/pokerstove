@@ -33,6 +33,10 @@ evaluators for the different variants of poker.
 
 A utility for viewing colexicographical index for sets of cards.
 
+### ps-sim
+
+A tool to simulate ranges of hands against other ranges of hands.
+
 ## Building
 
 The pokerstove libraries come with build scripts for cmake.  This
