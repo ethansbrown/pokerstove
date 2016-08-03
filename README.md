@@ -19,7 +19,7 @@ This fork is written with simulation of hand ranges in mind. Projects here will 
 
 ### peval
 
-This is a c++ poker hand evaluation library.  The main design goals of the library
+This is a C++ poker hand evaluation library.  The main design goals of the library
 are generality, extensibility, and ease of use.  There are evaluators for fourteen
 variants of poker.  Additionally, there are various card manipulation and query tools built
 into the CardSet class.
@@ -71,7 +71,7 @@ invoke cmake on the programs directory, then build.
 You should then be able to execute the simple command line
 example:
 
-    ~/cmake/programs$ ./programs/ps-eval/ps-eval
+    ./ps-eval
     Allowed options:
       -? [ --help ]          produce help message
       -g [ --game ] arg (=h) game to use for evaluation
@@ -79,31 +79,16 @@ example:
       -h [ --hand ] arg      a hand for evaluation
       -q [ --quiet ]         produce no output
     
-       For the --game option, one of the follwing games may be
-       specified.
-         h     hold'em
-         o     omaha/8
-         O     omaha high
-         r     razz
-         s     stud
-         e     stud/8
-         q     stud high/low no qualifier
-         d     draw high
-         l     lowball (A-5)
-         k     Kansas City lowball (2-7)
-         t     triple draw lowball (2-7)
-         T     triple draw lowball (A-5)
-         b     badugi
-         3     three-card poker
-    
        examples:
            ps-eval acas
-           ps-eval AcAs Kh4d --board 5c8s9h
            ps-eval AcAs Kh4d --board 5c8s9h
            ps-eval --game l 7c5c4c3c2c
            ps-eval --game k 7c5c4c3c2c
            ps-eval --game kansas-city-lowball 7c5c4c3c2c
 
+example:
+
+    ./ps-sim QQ+,AK JJ-99 --board 8c5s2d 
     
 ### Windows
 
@@ -142,9 +127,3 @@ Once you've installed and selfupdate'd macports, you can install boost:
     
 From there you can run the cmake gui as in windows.  This will create
 an XCode project which should comile the sample utility.
-
-install boost as you 
-
-[![Bitdeli Badge]
-(https://d2weczhvl823v0.cloudfront.net/andrewprock/pokerstove/trend.png)]
-(https://bitdeli.com/free "Bitdeli Badge")
