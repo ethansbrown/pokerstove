@@ -34,6 +34,15 @@ namespace pokerstove
  */
 std::set<CardSet>
 createCardSet(size_t numCards, Card::Grouping grouping=Card::RANK_SUIT);
+std::set<CardSet>
+createCardSet(size_t numCards,  const CardSet& excludedCards, Card::Grouping grouping=Card::RANK_SUIT);
+std::set<CardSet>
+createCardSet(const std::vector<std::string>& hands);
+std::set<CardSet>
+createCardSet(const std::string& comma_separated_hands_string);
+
+static std::string expand_range(const std::vector<std::string>&);
+static std::string expand_range(const std::string&);
 }
 
 #endif  // PEVAL_CARDSETGENERATORS_H_
