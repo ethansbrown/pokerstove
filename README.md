@@ -1,7 +1,7 @@
 PokerStove
 ==========
 
-PokerStove is a highly hand optimized C++ poker hand evaluation library.  The Win32 Hold'em
+PokerStove is a highly hand optimized C++ poker hand evaluation library written by Andrew Prock.  The Win32 Hold'em
 GUI was first released in 2002, and has been available as freeware since
 it's first release.
 
@@ -12,6 +12,8 @@ reviewed and code sanitized further commits will be added.
 Please find the old installer in the win32 directory.  That installer should
 install a version of PokerStove which will not expire at any time.  You can also
 find the apk file for the Android version of the utility in the android folder.
+
+This fork is written with simulation of hand ranges in mind. Projects here will build upon the existing pokerstove project.
 
 ## Libraries
 
