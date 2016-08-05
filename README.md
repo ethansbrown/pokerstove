@@ -62,7 +62,7 @@ To install the dependencies with apt get:
 To build under linux using cmake, create a build directory,
 invoke cmake on the programs directory, then build.
 
-    git clone https://github.com/andrewprock/pokerstove.git
+    git clone https://github.com/ethansbrown/pokerstove.git
     mkdir pokerstove/src/build
     cd pokerstove/src/build
     cmake ..
