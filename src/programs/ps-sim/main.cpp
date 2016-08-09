@@ -415,8 +415,8 @@ public:
     	auto rest_of_boards = createCardSet(remaining_cards, excludedCards); // assumes flop count = 3, total = 5, remaining = 2
 
 		// loop through all possible "rest-of-boards"
-		double first_win_count = 0.0;
-		double second_win_count = 0.0;
+		double first_win_count = 0;
+		double second_win_count = 0;
 		for (auto rit=rest_of_boards.begin(); rit!=rest_of_boards.end(); ++rit)
 		{
 			auto entire_board = CardSet(board) | *rit;
@@ -448,11 +448,12 @@ public:
     {
         std::stringstream ret;
         ret << "Total combos: " << _ordered_results.size() << endl;
+        int count = 0;
         for (auto it=_ordered_results.begin(); it!=_ordered_results.end(); ++it)
         {
             const string hand = it->first;
             const double value = it->second; 
-            ret << hand << ": " << value << " ";
+            ret << ++count << ". " << hand << ": " << value << " ";
             //ret += boost::str(boost::format("%s: %f\n") 
             //                  % hand % value;
             //sret += hand + " " + 
@@ -471,7 +472,7 @@ public:
     	return _board;
     }
 
-    map<string, string> create_predefined_ranges()
+    map<string, string> create_predefined_ranges() // Janda
     {
         map<string, string> m;
         m["UTG"] = "33+,AJo+,KQo,ATs+,KTs+,QTs+,J9s+,T9s,98s,87s,76s,65s";
@@ -489,13 +490,30 @@ public:
         m["SB_vs_MP"] = "JJ-77,AQo+,AQs,KQs";
         m["BB_vs_MP"] = "JJ-22,AQo,AQs,AJs,ATs,KJs+,QJs,JTs,T9s,98s,87s";
         m["BTN_vs_CO"] = "AA,TT-22,AJo+,KQo,AQs,AJs,ATs,A9s,A8s,KTs+,QTs+,J9s+,T8s+,97s+,86s+,75s+,65s,54s";
-        m["SB_vs_CO"] = "";
-        m["BB_vs_CO"] = "";
-        m["SB_vs_BTN"] = "";
-        m["BB_vs_BTN"] = "";
-        m["BB_vs_SB"] = "";
+        m["SB_vs_CO"] = "TT-88,AQo,AJo,KQo,AJs,ATs,KJs+,QJs";
+        m["BB_vs_CO"] = "TT-22,AQo,AJo,KQo,AJs,ATs,KJs,KTs,QTs+,J9s+,T9s,98s";
+        m["SB_vs_BTN"] = "99-66,KTo,QJo,QTo,A9s,A8s,KTs,K9s,QTs+,JTs,T9s";
+        m["BB_vs_BTN"] = "99-33,A9o,A8,A7,A6,A5,A4,A3,A2,KT,K9,K8,K7,K6s,K5s,Q7s+,QJo,QTo,Q9o,JT,J9,J8s,T9,T8s";
+        m["BB_vs_SB"] = "TT-22,AT,A9,A8,A7,A6,A5,A4,A3,A2,KJ,KT,K9,K8,K7,Q8+,J8+,T8o+,97o+,87o,76o,K6s,K5s,K4s,K3s,K2s,Q7s,Q6s,Q5s,Q4s,Q3s,Q2s,J7s,J6s,J5s,J4s,T5s+,95s+,85s+,74s+,64s+,53s+,43s";
         m["IP_3b_vs_UTG"] = "KK+,AJo,KQo,AKs,A5s,A4s";
         m["IP_3b_vs_MP"] = "QQ+,AJo,KQo,AKs,A5s,A4s,T8s,97s";
+        m["IP_3b_vs_CO"] = "AsAh,AsAd,AcAh,AcAd,KK-JJ,AK,ATo,KJo,QJo,A7s,A6s,A5s,A4s,A3s,A2s";
+        m["OOP_3b_vs_UTG"] = "KK+,AK,44-33,T9s,98s,87s,76s,65s";
+        m["SB_3b_vs_MP"] = "QQ+,66-44,AKo,AQs+,JTs,T9s,98s,87s,76s";
+        m["BB_3b_vs_MP"] = "QQ+,AKo,AQs+,QTs,J9s,T8s,97s+,87s,76s,65s,54s";
+        m["SB_3b_vs_CO"] = "JJ+,55-44,AKo,AQs+,KTs,QTs,J9s+,T8s+,97s+,87s,76s,65s,54s";
+        m["BB_3b_vs_CO"] = "JJ+,44-22,AKo,AQs+,A5s,A4s,K9s,Q9s,T8s,97s,86s+,75s+,64s+,54s";
+        m["SB_3b_vs_BTN"] = "TT+,55-33,AT+,KJ+,A7s,A6s,A5s,A4s,A3s,A2s,K8s,K7s,K6s,K5s,K4s,Q8s+,J8s+,T8s,97s+,86s+,75s+,64s+,54s";
+        m["BB_3b_vs_BTN"] = "TT+,22,AT+,KJ+,A9s,K4s,K3s,K2s,Q6s,Q5s,Q4s,Q3s,Q2s,J7s,J6s,T7s,96s+,85s+,75s+,64s+,53s+,43s";
+        m["UTG_flat_3b_OOP"] = "";
+        m["UTG_flat_3b_IP"] = "";
+        m["UTG_4b_OOP"] = "";
+        m["UTG_4b_IP"] = "";
+        m["MP_flat_3b_OOP"] = "";
+        m["MP_flat_3b_IP"] = "";
+        m["MP_4b_OOP"] = "";
+        m["MP_4b_IP"] = "";
+        m["BTN_flat_3b"] = "AA,TT-77,AQo,AJo,ATo,KT+,K9s,QJo,Q9s+,J9s+,AQs,AJs,ATs,A9s,A8s,A7s,A5s,A4s,A3s,A2s,T8s+,97s+,87s,76s,65s";
         return m;
     };
 
