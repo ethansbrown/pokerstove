@@ -92,4 +92,38 @@ createCardSet(size_t numCards,  const CardSet& excludedCards, Card::Grouping gro
     return ret;
 }
 
+std::vector<CardSet>
+createCardSetVector(size_t numCards,  const CardSet& excludedCards, Card::Grouping grouping)
+{
+    std::vector<CardSet> ret;
+    combinations cards(52,numCards);
+    do
+    {
+        CardSet hand;
+        for (size_t i=0; i<numCards; i++)
+        {
+            hand.insert (Card(cards[i]));
+        }
+
+        if(hand.intersects(excludedCards))
+            continue;
+
+        switch (grouping)
+        {
+        case Card::RANK_SUIT:
+            ret.push_back(hand);
+            break;
+        case Card::SUIT_CANONICAL:
+            ret.push_back(hand.canonize());
+            break;
+        case Card::RANK:
+            ret.push_back(hand.canonizeRanks());
+            break;
+        };
+
+    }
+    while (cards.next());
+    return ret;
+}
+
 }

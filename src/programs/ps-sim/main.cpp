@@ -18,6 +18,21 @@ using namespace std;
 namespace po = boost::program_options;
 using namespace pokerstove;
 
+struct HandEquity
+{
+    HandEquity(const CardSet& _hand, double _equity) :
+    hand(_hand)
+    , equity(_equity)
+    {}
+    CardSet hand;
+    double equity;
+};
+
+bool sort_by_equity(const HandEquity& lhs, const HandEquity& rhs)
+{
+    return lhs.equity > rhs.equity;
+}
+
 class SimDriver
 {
 public:
@@ -33,40 +48,86 @@ public:
         srand(time(NULL));
         predefined_ranges = create_predefined_ranges();
 
-        initialize_ranges();
+        //initialize_ranges();
+        initialize_equities();
 
-        //_results = turn_equity_likelihood(0.8);
-        _results = simulate(approximate);
+        //_results = simulate(_ranges[0], _ranges[1], approximate);
+        simulate(_equities[0], _equities[1], approximate);
+        simulate(_equities[1], _equities[0], approximate);
 
-        for (auto it=_results.begin(); it != _results.end(); ++it)
-        {
-            _ordered_results.push_back(std::pair<string, double>(it->first, it->second));
-        }
+        std::sort(_equities[0].begin(), _equities[0].end(), sort_by_equity);
+        std::sort(_equities[1].begin(), _equities[1].end(), sort_by_equity);
 
-        std::stable_sort(_ordered_results.begin(), _ordered_results.end(), 
-            boost::bind(&std::pair<string, double>::second, _1) > 
-            boost::bind(&std::pair<string, double>::second, _2));
+        cout << "vs All:" << endl;
+        print();
+
+        int N; 
+        
+        N = 0.2 * _equities[1].size();
+        simulate(_equities[0], vector<HandEquity>(_equities[1].begin(), _equities[1].begin() + N), approximate);
+        cout << "vs top 20%:" << endl; 
+        print();
+
+        N = 0.6 * _equities[1].size();
+        simulate(_equities[0], vector<HandEquity>(_equities[1].begin(), _equities[1].begin() + N), approximate);
+        cout << "vs top 60%:" << endl; 
+        print();
+
+        N = 0.6 * _equities[1].size();
+        simulate(_equities[0], vector<HandEquity>(_equities[1].begin() + N, _equities[1].end()), approximate);
+        cout << "vs bottom 40%:" << endl; 
+        print();                
+
+        // for (auto it=_results.begin(); it != _results.end(); ++it)
+        // {
+        //     _ordered_results.push_back(std::pair<string, double>(it->first, it->second));
+        // }
+
+        // std::stable_sort(_ordered_results.begin(), _ordered_results.end(), 
+        //     boost::bind(&std::pair<string, double>::second, _1) > 
+        //     boost::bind(&std::pair<string, double>::second, _2));
     }   
 
-    void initialize_ranges()
+    // void initialize_ranges()
+    // {
+    // 	for (auto it=_hands.begin(); it != _hands.end(); ++it)
+    // 	{
+    // 		*it = expand_range(*it);
+    // 	}
+    // 	for (auto i=0; i<_hands.size(); i++)
+    // 	{
+    // 		set<CardSet> r;
+    //     	vector<string> vector_of_strings;
+    //     	boost::split(vector_of_strings, _hands[i], boost::is_any_of(","));
+    //     	for (auto it=vector_of_strings.begin(); it !=vector_of_strings.end(); ++it)
+    //     	{
+    //     		CardSet cs(*it);
+    //     		if (!cs.intersects(_board_cs))
+    //     			r.insert(cs);
+    //     	}
+    // 		_ranges.push_back(r);
+    // 	}
+    // }
+
+    void initialize_equities()
     {
-    	for (auto it=_hands.begin(); it != _hands.end(); ++it)
-    	{
-    		*it = expand_range(*it);
-    	}
-    	for (auto i=0; i<_hands.size(); i++)
-    	{
-    		set<CardSet> r;
-        	vector<string> vector_of_strings;
-        	boost::split(vector_of_strings, _hands[i], boost::is_any_of(","));
-        	for (auto it=vector_of_strings.begin(); it !=vector_of_strings.end(); ++it)
-        	{
-        		CardSet cs(*it);
-        		if (!cs.intersects(_board_cs))
-        			r.insert(cs);
-        	}
-    		_ranges.push_back(r);
-    	}
+        for (auto it=_hands.begin(); it != _hands.end(); ++it)
+        {
+            *it = expand_range(*it);
+        }
+        for (auto i=0; i<_hands.size(); i++)
+        {
+            vector<HandEquity> e;
+            vector<string> vector_of_strings;
+            boost::split(vector_of_strings, _hands[i], boost::is_any_of(","));
+            for (auto it=vector_of_strings.begin(); it !=vector_of_strings.end(); ++it)
+            {
+                CardSet cs(*it);
+                if (!cs.intersects(_board_cs))
+                    e.push_back(HandEquity(cs, -1));
+            }
+            _equities.push_back(e);
+        }
     }
 
     string expand_range(const string& hands)
@@ -279,7 +340,7 @@ public:
 		return (winner_count / count);
     }
 
-    map<string, double> simulate(bool approximate)
+    map<string, double> simulate(set<CardSet> range1, set<CardSet> range2, bool approximate)
     {
     	map<string, double> result;
 
@@ -288,11 +349,11 @@ public:
     		return result;
     	}
 
-    	for (auto it=_ranges[0].begin(); it != _ranges[0].end(); ++it)
+    	for (auto it=range1.begin(); it != range1.end(); ++it)
     	{
     		double value_sum = 0;
     		double value_count = 0;
-    		for (auto it2=_ranges[1].begin(); it2 != _ranges[1].end(); ++it2)
+    		for (auto it2=range2.begin(); it2 != range2.end(); ++it2)
     		{
     			double sim = simulate(*it, *it2, _board, approximate);
 
@@ -314,6 +375,39 @@ public:
 
     	return result;
     }
+
+    void print()
+    {
+        cout << this->str();
+    }
+
+    void simulate(vector<HandEquity>& range, const vector<HandEquity>& other, bool approximate)
+    {
+        for (auto it=range.begin(); it != range.end(); ++it)
+        {
+            double value_sum = 0;
+            double value_count = 0;
+            for (auto it2=other.begin(); it2 != other.end(); ++it2)
+            {
+                double sim = simulate(it->hand, it2->hand, _board, approximate);
+
+                if (sim >= 0)
+                {
+                    value_sum += sim;
+                    value_count++;
+                }
+            }
+            if (value_count > 0)
+            {
+                it->equity = value_sum / value_count; //result.insert(pair<string, double>(it->str(), value_sum / value_count));
+            }
+            else
+            {
+                it->equity = 0.5;// result.insert(pair<string, double>(it->str(), 0.5)); // default result in case range2 empty
+            }
+        }
+    }
+
 
     // hand vs hand binary, returns sampled result of first_hand in {1, 0}
     double approx_sim(const CardSet& first_hand, const CardSet& second_hand, const CardSet& board)
@@ -357,45 +451,7 @@ public:
     }
 
     // hand vs hand binary, returns sampled result of first_hand in {1, 0}
-    double approx_sim(const string& first_hand, const string& second_hand, const string& board)
-    {
-        //cout << "approx_sim" << first_hand << " " << second_hand << " " << board << endl;
-        if (CardSet(first_hand).intersects(CardSet(second_hand)))
-            return -1;
 
-        CardSet excludedCards(board);
-        int remaining_cards = 5 - excludedCards.size();
-        excludedCards |= CardSet(first_hand);
-        excludedCards |= CardSet(second_hand);
-
-        set<CardSet> rest_of_boards = createCardSet(remaining_cards, excludedCards); 
-        int random = rand() % (int)(rest_of_boards.size());
-        int count = 0;
-
-        for (auto rit=rest_of_boards.begin(); rit!=rest_of_boards.end(); count++,++rit)
-        {
-            if (count > random)
-            {
-                auto entire_board = CardSet(board) | *rit;
-                PokerHandEvaluation first_eval = _peval->evaluate(CardSet(first_hand), entire_board);
-                PokerHandEvaluation second_eval = _peval->evaluate(CardSet(second_hand), entire_board);
-                if (first_eval.high().code() > second_eval.high().code())
-                {
-                    return 1;
-                }
-                else 
-                {
-                    if (first_eval.high().code() < second_eval.high().code())
-                    {
-                        return 0;
-                    }
-                    else return 0.5;
-                }
-            }
-        }
-
-        return 0; 
-    }
 
     double simulate(const CardSet& first_hand, const CardSet& second_hand, const CardSet& board, bool approximate=false)
     {
@@ -417,6 +473,7 @@ public:
 		// loop through all possible "rest-of-boards"
 		double first_win_count = 0;
 		double second_win_count = 0;
+        double tie_count = 0;
 		for (auto rit=rest_of_boards.begin(); rit!=rest_of_boards.end(); ++rit)
 		{
 			auto entire_board = CardSet(board) | *rit;
@@ -432,33 +489,41 @@ public:
 			{
 				second_win_count++;
 			}
+            if (first_eval.high().code() == second_eval.high().code())
+            {
+                tie_count++;
+            }
 		}
 
-		return first_win_count / (first_win_count + second_win_count);
+		return (first_win_count + tie_count) / (first_win_count + second_win_count + tie_count);
 
     }
 
     // hand vs hand simulation, returns equity of first_hand
-    double simulate(const string& first_hand, const string& second_hand, const string& board, bool approximate)
-    {
-    	return simulate(CardSet(first_hand), CardSet(second_hand), CardSet(board), approximate);
-    }
+
 
     string str() const
     {
         std::stringstream ret;
-        ret << "Total combos: " << _ordered_results.size() << endl;
-        int count = 0;
-        for (auto it=_ordered_results.begin(); it!=_ordered_results.end(); ++it)
-        {
-            const string hand = it->first;
-            const double value = it->second; 
-            ret << ++count << ". " << hand << ": " << value << " ";
-            //ret += boost::str(boost::format("%s: %f\n") 
-            //                  % hand % value;
-            //sret += hand + " " + 
+        for (int i=0; i<_equities.size()-1; i++)
+            {
+            ret << "Total combos: " << _equities[i].size() << endl;
+            int count = 0;
+            for (auto it=_equities[i].begin(); it!=_equities[i].end(); ++it)
+            {
+                ret << ++count << "," << (it->hand).str() << "," << it->equity << endl;
+            }
+            count = 0;
+            for (auto it=_equities[i].begin(); it!=_equities[i].end(); ++it)
+            {
+                ret << (it->hand).str();
+                if (++count < _equities[i].size())
+                {
+                    ret << ",";
+                }
+            }
+            ret << endl;
         }
-        ret << endl;
         return ret.str();
     }
 
@@ -521,11 +586,14 @@ private:
     boost::shared_ptr<PokerHandEvaluator> _peval;
     vector<string> _hands;
     vector<set<CardSet> > _ranges;
+    vector<vector<HandEquity> > _equities; 
     string _board;
     CardSet _board_cs;
     map<string, double> _results;
     vector<pair<string, double> > _ordered_results;
     map<string, string> predefined_ranges; 
+
+
 };
 
 int main (int argc, char ** argv)
@@ -548,7 +616,7 @@ int main (int argc, char ** argv)
             ("game,g",    po::value<string>()->default_value("h"), "game to use for evaluation")
             ("board,b",   po::value<string>()->default_value(""),  "community cards for he/o/o8")
             ("hand,h",    po::value< vector<string> >(),           "a hand for evaluation")
-            ("quiet,q",   "produce no output")
+            //("quiet,q",   "produce no output")
 			("approx,a",  "use approximatation for simulation")
             ;
       
@@ -575,8 +643,8 @@ int main (int argc, char ** argv)
                           vm["board"].as<string>(),
 						  vm.count("approx"));
 
-        if (vm.count("quiet") == 0)
-            cout << driver.str();
+        // if (vm.count("quiet") == 0)
+        //     cout << driver.str();
     }
     catch(std::exception& e) 
     {

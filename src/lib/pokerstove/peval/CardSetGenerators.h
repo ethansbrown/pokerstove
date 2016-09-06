@@ -41,6 +41,9 @@ createCardSet(const std::vector<std::string>& hands);
 std::set<CardSet>
 createCardSet(const std::string& comma_separated_hands_string);
 
+std::vector<CardSet>
+createCardSetVector(size_t numCards,  const CardSet& excludedCards, Card::Grouping grouping=Card::RANK_SUIT);
+
 static std::string expand_range(const std::vector<std::string>&);
 static std::string expand_range(const std::string&);
 }
