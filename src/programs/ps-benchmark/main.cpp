@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 
     auto nonempty = benchmark(experiment, count, generator);
 
-    std::cout << empty << " " << nonempty << std::endl;
+    std::cout << empty << " " << nonempty << " " << 1.0*(nonempty - empty) / nonempty << " " <<  count / 1.0*(nonempty - empty) << std::endl;
 
     return 0;
 }
