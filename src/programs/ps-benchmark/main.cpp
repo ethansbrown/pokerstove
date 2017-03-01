@@ -78,8 +78,10 @@ int main(int argc, char** argv)
 
     auto nonempty = benchmark(experiment, count, generator);
 
-    std::cout << empty << " " << nonempty << " " << 1.0*(nonempty - empty) / nonempty << " " <<  count / 1.0*(nonempty - empty) << std::endl;
-
+    std::cout << empty << " " << nonempty << " " << std::endl;
+    std::cout << "Micros per eval: " << 1.0*(nonempty - empty) / count << std::endl;
+    std::cout << "Million evals per sec: " << 1.0*count / (nonempty - empty) << std::endl;
+    std::cout << total << std::endl;
     return 0;
 }
 
